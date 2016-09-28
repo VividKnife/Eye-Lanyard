@@ -32,8 +32,10 @@ const byte years = 16;
 byte alarm_seconds;
 byte alarm_minutes;
 byte alarm_hours;
+int  alarm_run_time;
 
 void alarmMatch(void);
+int find_text(String needle, String haystack);
 
 /**********************************************************/
 void setup(void)
@@ -45,6 +47,11 @@ void setup(void)
   rtc.begin();
   rtc.setTime(hours, minutes, seconds);
   rtc.setDate(days, months, years);
+
+  rtc.setAlarmTime(14, 00, 10);
+  rtc.enableAlarm(rtc.MATCH_HHMMSS);
+
+  rtc.attachInterrupt(alarmMatch);
 
   if ( !ble.begin(VERBOSE_MODE) )
   {
@@ -62,7 +69,7 @@ void setup(void)
   ble.verbose(false);  // debug info is a little annoying after this point!
   /* Wait for connection */
 
-  rtc.standbyMode();
+  //rtc.standbyMode();
 
 
 }
@@ -87,15 +94,20 @@ void loop(void)
     if (cmd == "On") {
       digitalWrite(13, HIGH);
     }
-    if (cmd == "Off") {
+    else if (cmd == "Off") {
       digitalWrite(13, LOW);
     }
-    if (find_text("alarm",cmd) {
-
-      rtc.setAlarmTime(14, 00, 10);
+    else if (find_text("alarm",cmd)==0) {
+      //digitalWrite(13, HIGH);
+//    
+        updateAlarmTime();
+        int i = cmd.substring(5,7).toInt();
+      
+      rtc.setAlarmTime(alarm_hours, alarm_minutes, alarm_seconds+i);
       rtc.enableAlarm(rtc.MATCH_HHMMSS);
 
       rtc.attachInterrupt(alarmMatch);
+    
     }
 
     ble.waitForOK();
@@ -109,4 +121,20 @@ void loop(void)
 void alarmMatch()
 {
   digitalWrite(13, HIGH);
+}
+
+void updateAlarmTime()
+{     alarm_seconds = rtc.getSeconds();
+      alarm_minutes = rtc.getMinutes();
+      alarm_hours   = rtc.getHours();
+}
+
+int find_text(String needle, String haystack) {
+  int foundpos = -1;
+  for (int i = 0; i <= haystack.length() - needle.length(); i++) {
+    if (haystack.substring(i,needle.length()+i) == needle) {
+      foundpos = i;
+    }
+  }
+  return foundpos;
 }
