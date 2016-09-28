@@ -1,6 +1,3 @@
-//#include <ephemera_common.h>
-//#include <time.h>
-#include "RTCInt.h"
 #include <Arduino.h>
 #include <SPI.h>
 //#include <sleep.h>
