@@ -1,5 +1,6 @@
 #include <RTCZero.h>
 #include <Arduino.h>
+#include <PrintEx.h>
 #include <SPI.h>
 #if not defined (_VARIANT_ARDUINO_DUE_X_) && not defined (_VARIANT_ARDUINO_ZERO_)
 #include <SoftwareSerial.h>
@@ -71,9 +72,11 @@ int motor1 = 12;
 int motor2 = 11;
 int button = 8 ;
 
+StreamEx mySerial = Serial; //serial with printf
+
 void debuger(String message){
     if(DEBUGMODE_ENABLE && enableMessage){
-          Serial.println(message);    
+          mySerial.println(message);    
       }
   }
 
@@ -85,7 +88,7 @@ void setup(void)
 
   Serial.begin(115200);
   debuger("****Eye Lanyard project Debug Mode****");
-  
+  mySerial.printf("123%d",4);
   
   pinMode(13, OUTPUT);
   pinMode(motor1, OUTPUT);
