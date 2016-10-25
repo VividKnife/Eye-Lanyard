@@ -64,8 +64,12 @@ MedAlarm alarm5{5,0,0,0,0};
 MedAlarm alarm6{6,0,0,0,0};
 
 int currentAlarm = 1;
+int speed = 200; // speed should be within 0 - 255
 
-
+/*Definations for pins */
+int motor1 = 12;
+int motor2 = 11;
+int button = 8 ;
 
 void debuger(String message){
     if(DEBUGMODE_ENABLE && enableMessage){
@@ -84,8 +88,8 @@ void setup(void)
   
   
   pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(11, OUTPUT);
+  pinMode(motor1, OUTPUT);
+  pinMode(motor2, OUTPUT);
   digitalWrite(13, LOW);
   rtc.begin();
   rtc.setTime(hours, minutes, seconds);
@@ -204,6 +208,11 @@ void BLEcommand(void)
 //format:setTime:y16:o09:d28:h12:m39:s22
     {
         setTimeInput(cmd.substring(6));
+    }else if (find_text("speed",cmd)==0)
+    {
+        speed = cmd.substring(4).toInt();
+        debuger((String)speed);
+
     }
 
     ble.waitForOK();
@@ -402,6 +411,16 @@ void setCurrentAlarm(void)
 void alarmMatch()
 {
   digitalWrite(13, HIGH);
+  MedAlarm tmp = getMedAlarm(currentAlarm);
+  if(tmp.id<=3){
+    analogWrite(motor1,speed);
+    debuger("Motor1 ON");
+  }else
+  {
+    analogWrite(motor2,speed);
+    debuger("Moter2 ON");
+  }
+
   debuger("Alarm Match!!!****************");
   debuger("The Matched alarm is");
   debuger((String)currentAlarm);
