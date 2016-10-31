@@ -93,6 +93,9 @@ void setup(void)
   pinMode(13, OUTPUT);
   pinMode(motor1, OUTPUT);
   pinMode(motor2, OUTPUT);
+  pinMode(button,INPUT_PULLUP); // to be changed
+  attachInterrupt(digitalPinToInterrupt(button),buttonClicked,CHANGE);
+
   digitalWrite(13, LOW);
   rtc.begin();
   rtc.setTime(hours, minutes, seconds);
@@ -448,4 +451,11 @@ int find_text(String needle, String haystack) {
     }
   }
   return foundpos;
+}
+void buttonClicked()
+{
+  digitalWrite(13, LOW);
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  
 }
