@@ -64,7 +64,12 @@ MedAlarm alarm4{4,0,0,0,0};
 MedAlarm alarm5{5,0,0,0,0};
 MedAlarm alarm6{6,0,0,0,0};
 
+
+
+String timeStamp[50];
+
 int currentAlarm = 1;
+int timeStampCounter = 0;
 int speed = 200; // speed should be within 0 - 255
 
 /*Definations for pins */
@@ -219,6 +224,18 @@ void BLEcommand(void)
         speed = cmd.substring(4).toInt();
         debuger((String)speed);
 
+    }else if (find_text("clearTimeStamp",cmd)==0)
+    {
+        timeStampCounter = 0;
+        debuger("Time Stamp cleared"); 
+    }else if (find_text("getTimeStamp",cmd) == 0)
+    {
+        int i;
+        for(i = 0;timeStamp[i][0] == 'M';i++)
+        {
+            ble.print("AT+BLEUARTTX=");
+            ble.println(timeStamp[i]);
+        }
     }
 
     ble.waitForOK();
@@ -452,10 +469,20 @@ int find_text(String needle, String haystack) {
   }
   return foundpos;
 }
+
+
 void buttonClicked()
 {
   digitalWrite(13, LOW);
   digitalWrite(motor1, LOW);
   digitalWrite(motor2, LOW);
   
+  String h = String(rtc.getHours(),DEC);
+  String m = String(rtc.getMinutes(),DEC);
+  String s = String(rtc.getSeconds(),DEC);
+  timeStamp[timeStampCounter] = String("Med 1: " + h + ": " + m + ": " + s);
+  timeStampCounter++;
+  if(timeStampCounter==50) timeStampCounter = 0;
+  
+
 }
