@@ -67,6 +67,10 @@ MedAlarm alarm6{6,0,0,0,0};
 int currentAlarm = 1;
 int speed = 200; // speed should be within 0 - 255
 
+String timeStamp[50];  //timestamp set up
+int timeStampCounter = 0;
+int timeStampflag = 0;
+
 /*Definations for pins */
 int motor1 = 12;
 int motor2 = 11;
@@ -82,9 +86,34 @@ void debuger(String message){
 
 void buttonClicked()
 {
+  if(timeStampflag == 1){
       digitalWrite(13, LOW);
       digitalWrite(motor1, LOW);
-      digitalWrite(motor2, LOW);
+      
+  String h = String(rtc.getHours(),DEC);
+  String m = String(rtc.getMinutes(),DEC);
+  String s = String(rtc.getSeconds(),DEC);
+  timeStamp[timeStampCounter] = String("Med 1: " + h + ": " + m + ": " + s);
+
+  debuger(String("TimeStamp: Med 1: " + h + ": " + m + ": " + s));
+  timeStampCounter++;
+  if(timeStampCounter==50) timeStampCounter = 0;
+  timeStampflag = 0;
+  }else if(timeStampflag == 2){
+  
+  digitalWrite(motor2, LOW);
+  digitalWrite(13, LOW);
+      
+  String h = String(rtc.getHours(),DEC);
+  String m = String(rtc.getMinutes(),DEC);
+  String s = String(rtc.getSeconds(),DEC);
+  timeStamp[timeStampCounter] = String("Med 2: " + h + ": " + m + ": " + s);
+
+  debuger(String("TimeStamp: Med 2: " + h + ": " + m + ": " + s));
+  timeStampCounter++;
+  if(timeStampCounter==50) timeStampCounter = 0;
+  timeStampflag = 0;  
+  }
 }
 
 /**********************************************************/
@@ -105,7 +134,7 @@ void setup(void)
   digitalWrite(13, LOW);
   
   pinMode(6,INPUT_PULLDOWN); // to be changed
-  attachInterrupt(digitalPinToInterrupt(6),buttonClicked,CHANGE);
+  attachInterrupt(digitalPinToInterrupt(6),buttonClicked,RISING);
   
   rtc.begin();
   rtc.setTime(hours, minutes, seconds);
@@ -118,7 +147,7 @@ void setup(void)
   rtc.enableAlarm(rtc.MATCH_HHMMSS);
   rtc.attachInterrupt(alarmMatch);
   setMedAlarm(1,14,00,5,1);  
-  setMedAlarm(2,14,00,10,1); 
+  setMedAlarm(4,14,00,10,1); 
   //setMedAlarm(3,14,00,20,1); 
   }
 
@@ -195,9 +224,11 @@ void BLEcommand(void)
       digitalWrite(13, HIGH);
       debuger("LED turned ON");
       if(DEBUGMODE_ENABLE){
-      updateAlarmTime();
-      setMedAlarm(1,alarm_hours,alarm_minutes,alarm_seconds+5,1);
-      setCurrentAlarm();
+     // updateAlarmTime();
+     // setMedAlarm(1,alarm_hours,alarm_minutes,alarm_seconds+5,1);
+     // setCurrentAlarm();
+     rtc.setTime(hours, minutes, seconds);
+      //timeStampflag = 1;
       }
       
     }
@@ -229,6 +260,17 @@ void BLEcommand(void)
         speed = cmd.substring(4).toInt();
         debuger((String)speed);
 
+    }else if (find_text("getTS",cmd) == 0)
+    {
+        int i;
+        for(i = 0;timeStamp[i][0] == 'M';i++)
+        {
+            delay(50);
+            ble.print("AT+BLEUARTTX=");
+            ble.println(timeStamp[i]);
+            delay(50);
+            debuger(timeStamp[i]);
+        }
     }
 
     ble.waitForOK();
@@ -259,8 +301,7 @@ void setAlarmInput(String cmd)    //string cmd input format:
     setMedAlarm(input_id,input_hours,input_minutes,input_seconds,1);
     MedAlarm tmp = getMedAlarm(input_id);
     
-    debuger("The inputed id is: ");
-    debuger((String)input_id);
+    debuger(String("The inputed id is: "+(String)input_id+"alarm time: "));
     debuger((String)tmp.h);
     debuger((String)tmp.m );
     debuger((String)tmp.s);
@@ -426,14 +467,17 @@ void setCurrentAlarm(void)
 
 void alarmMatch()
 {
+  //timeStampflag = 1;
   digitalWrite(13, HIGH);
   MedAlarm tmp = getMedAlarm(currentAlarm);
   if(tmp.id<=3){
     analogWrite(motor1,speed);
+    timeStampflag = 1;
     debuger("Motor1 ON");
   }else
   {
     analogWrite(motor2,speed);
+    timeStampflag = 2;
     debuger("Moter2 ON");
   }
 
