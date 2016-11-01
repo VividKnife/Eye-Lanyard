@@ -1,6 +1,5 @@
 #include <RTCZero.h>
 #include <Arduino.h>
-#include <PrintEx.h>
 #include <SPI.h>
 #if not defined (_VARIANT_ARDUINO_DUE_X_) && not defined (_VARIANT_ARDUINO_ZERO_)
 #include <SoftwareSerial.h>
@@ -14,7 +13,6 @@
 #define FACTORYRESET_ENABLE         1
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
-#define DEBUGMODE_ENABLE            1
 
 
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
@@ -72,13 +70,7 @@ int motor1 = 12;
 int motor2 = 11;
 int button = 8 ;
 
-StreamEx mySerial = Serial; //serial with printf
 
-void debuger(String message){
-    if(DEBUGMODE_ENABLE && enableMessage){
-          mySerial.println(message);    
-      }
-  }
 
 void buttonClicked()
 {
@@ -90,14 +82,6 @@ void buttonClicked()
 /**********************************************************/
 void setup(void)
 {
-  if(DEBUGMODE_ENABLE){
-  while(!Serial);
-  delay(500);
-
-  Serial.begin(115200);
-  debuger("****Eye Lanyard project Debug Mode****");
- // mySerial.printf("123%d",4);
-  }
   
   pinMode(13, OUTPUT);
   pinMode(motor1, OUTPUT);
@@ -111,16 +95,6 @@ void setup(void)
   rtc.setTime(hours, minutes, seconds);
   rtc.setDate(days, months, years);
 
-  debuger("RTC start");
-
-  if(DEBUGMODE_ENABLE){
-  rtc.setAlarmTime(14, 00, 5);
-  rtc.enableAlarm(rtc.MATCH_HHMMSS);
-  rtc.attachInterrupt(alarmMatch);
-  setMedAlarm(1,14,00,5,1);  
-  setMedAlarm(2,14,00,10,1); 
-  //setMedAlarm(3,14,00,20,1); 
-  }
 
   
 
@@ -142,28 +116,13 @@ void setup(void)
 
   //rtc.standbyMode();
 
-  debuger("BLE setup");
-
 
 }
-
-int floop = 1;
-int fcommand = 1;
 
 void loop(void)
 {
   
-  if(floop){
-  fcommand = 1;
-  debuger("Enter the loop function, waitting for ble connection");
-  floop=0;
-  }
   while ( ble.isConnected()) {
-    if(fcommand){
-        debuger("BLE connected, waitting for commmad");
-        fcommand = 0;
-        floop =1; 
-    }
     BLEcommand();
   }
    
@@ -187,36 +146,16 @@ void BLEcommand(void)
     // Some data was found, its in the buffer
     String cmd;
     cmd = ble.buffer;
-    debuger("Find a command: ");
-    debuger(cmd);
 
     
     if (cmd == "On") {
       digitalWrite(13, HIGH);
-      debuger("LED turned ON");
-      if(DEBUGMODE_ENABLE){
-      updateAlarmTime();
-      setMedAlarm(1,alarm_hours,alarm_minutes,alarm_seconds+5,1);
-      setCurrentAlarm();
-      }
       
     }
     else if (cmd == "Off") {
       digitalWrite(13, LOW);
-      debuger("LED turned OFF");
     }
     else if (find_text("alarm",cmd)==0) {
-      //digitalWrite(13, HIGH);
-//    
-        //updateAlarmTime();
-        //int i = cmd.substring(5,7).toInt();
-      
-      //rtc.setAlarmTime(alarm_hours, alarm_minutes, alarm_seconds+i);
-      //rtc.enableAlarm(rtc.MATCH_HHMMSS);
-
-      //rtc.attachInterrupt(alarmMatch);
-
-       debuger("Start setting alarm:");
         delay(50);
         setAlarmInput(cmd.substring(5));
     
@@ -227,7 +166,6 @@ void BLEcommand(void)
     }else if (find_text("speed",cmd)==0)
     {
         speed = cmd.substring(4).toInt();
-        debuger((String)speed);
 
     }
 
@@ -241,8 +179,6 @@ void BLEcommand(void)
 void setAlarmInput(String cmd)    //string cmd input format:
 //alarm:h12:m30:s22 --> 12:30:22
 {
-   
-    debuger("In setAlarmInput function: ");
     int index;
     index = cmd.indexOf('i');
     int input_id       = cmd.substring(index+1,index+3).toInt();
@@ -258,12 +194,6 @@ void setAlarmInput(String cmd)    //string cmd input format:
 
     setMedAlarm(input_id,input_hours,input_minutes,input_seconds,1);
     MedAlarm tmp = getMedAlarm(input_id);
-    
-    debuger("The inputed id is: ");
-    debuger((String)input_id);
-    debuger((String)tmp.h);
-    debuger((String)tmp.m );
-    debuger((String)tmp.s);
     
     delay(500);
     ble.print("AT+BLEUARTTX=");
@@ -288,11 +218,7 @@ void setTimeInput(String cmd)
     int input_months   = cmd.substring(index+1,index+3).toInt();
     index = cmd.indexOf('d');
     int input_days     = cmd.substring(index+1,index+3).toInt();
-    debuger("Setting time!");
-
-    debuger((String)input_hours);
-    debuger((String)input_minutes);
-    debuger((String)input_seconds);
+    
     rtc.setTime(input_hours, input_minutes, input_seconds);
     rtc.setDate(input_days, input_months, input_years);
  }
@@ -302,7 +228,6 @@ MedAlarm getMedAlarm(int id)
     switch (id)
     {
         case 1:
-            debuger("get alarm 1");
             //alarm1.enable = 1;
             return alarm1;
             break;
@@ -333,21 +258,18 @@ void setMedAlarm(int id,int h, int m, int s,int en)
     switch (id)
     {
         case 1:
-            debuger("setting alarm 1");
             alarm1.h = h;
             alarm1.m = m;
             alarm1.s = s;
             alarm1.enable = en;
             break;
         case 2:
-            debuger("setting alarm 2");
             alarm2.h = h;
             alarm2.m = m;
             alarm2.s = s;
             alarm2.enable = en;
             break;
         case 3:
-            debuger("setting alarm 3");
             alarm3.h = h;
             alarm3.m = m;
             alarm3.s = s;
@@ -355,28 +277,24 @@ void setMedAlarm(int id,int h, int m, int s,int en)
             
             break;
         case 4:
-            debuger("setting alarm 4");
             alarm4.h = h;
             alarm4.m = m;
             alarm4.s = s;
             alarm4.enable = en;
             break;
         case 5:
-            debuger("setting alarm 5");
             alarm5.h = h;
             alarm5.m = m;
             alarm5.s = s;
             alarm5.enable = en;
             break;
         case 6:
-            debuger("setting alarm 6");
             alarm6.h = h;
             alarm6.m = m;
             alarm6.s = s;
             alarm6.enable = en;
             break;
         default:
-            debuger("The alarm id is 1-6");
             break;
     }
 }
@@ -384,7 +302,6 @@ void setMedAlarm(int id,int h, int m, int s,int en)
 void setCurrentAlarm(void)
 {
     MedAlarm tmp = getMedAlarm(currentAlarm);
-    debuger("Setting Current Alarm");
     int i = 0;
     while(tmp.enable==0 && i < 7)
     {
@@ -392,34 +309,14 @@ void setCurrentAlarm(void)
         if(currentAlarm==7) currentAlarm = 1;
         tmp = getMedAlarm(currentAlarm);
         i++;
-        debuger("FINDING ALARM");
-        debuger((String)tmp.id);
-        if(tmp.enable==0){
-        debuger("is not enabled");
-        }else
-        {
-          debuger("is enabled");
-          }
         
     }
 
     if(tmp.enable){
-    debuger("The avialable alarms is : ");
-    debuger(String(currentAlarm));
     
     rtc.setAlarmTime(tmp.h,tmp.m,tmp.s);
     rtc.enableAlarm(rtc.MATCH_HHMMSS);
     rtc.attachInterrupt(alarmMatch);
-
-    debuger("The alarm h/m/s is");
-    debuger((String)tmp.h);
-    debuger((String)tmp.m);
-    debuger((String)tmp.s);
-
-    debuger("SUCCESSFULLY SETTED THIS ALARM");
-    }else
-    {
-      debuger("No alarm is avilable");
     }
 }
 
@@ -430,20 +327,13 @@ void alarmMatch()
   MedAlarm tmp = getMedAlarm(currentAlarm);
   if(tmp.id<=3){
     analogWrite(motor1,speed);
-    debuger("Motor1 ON");
   }else
   {
     analogWrite(motor2,speed);
-    debuger("Moter2 ON");
   }
 
-  debuger("Alarm Match!!!****************");
-  debuger("The Matched alarm is");
-  debuger((String)currentAlarm);
   currentAlarm++;
   if(currentAlarm==6) currentAlarm = 1;
-  debuger("go to next alarm");
-  debuger((String)currentAlarm);
   setCurrentAlarm();
 }
 
