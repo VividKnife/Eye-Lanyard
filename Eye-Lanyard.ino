@@ -143,11 +143,12 @@ void setup(void)
   debuger("RTC start");
 
   if(DEBUGMODE_ENABLE){
-  rtc.setAlarmTime(14, 00, 5);
-  rtc.enableAlarm(rtc.MATCH_HHMMSS);
-  rtc.attachInterrupt(alarmMatch);
+ // rtc.setAlarmTime(14, 00, 5);
+ // rtc.enableAlarm(rtc.MATCH_HHMMSS);
+ // rtc.attachInterrupt(alarmMatch);
   setMedAlarm(1,14,00,5,1);  
   setMedAlarm(4,14,00,10,1); 
+  setCurrentAlarm();
   //setMedAlarm(3,14,00,20,1); 
   }
 
