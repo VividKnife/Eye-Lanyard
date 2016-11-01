@@ -11,7 +11,7 @@
 #include "Adafruit_BluefruitLE_UART.h"
 
 #include "BluefruitConfig.h"
-#define FACTORYRESET_ENABLE         0
+#define FACTORYRESET_ENABLE         1
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
 #define DEBUGMODE_ENABLE            1
@@ -80,20 +80,33 @@ void debuger(String message){
       }
   }
 
+void buttonClicked()
+{
+      digitalWrite(13, LOW);
+      digitalWrite(motor1, LOW);
+      digitalWrite(motor2, LOW);
+}
+
 /**********************************************************/
 void setup(void)
 {
+  if(DEBUGMODE_ENABLE){
   while(!Serial);
   delay(500);
 
   Serial.begin(115200);
   debuger("****Eye Lanyard project Debug Mode****");
-  mySerial.printf("123%d",4);
+ // mySerial.printf("123%d",4);
+  }
   
   pinMode(13, OUTPUT);
   pinMode(motor1, OUTPUT);
   pinMode(motor2, OUTPUT);
   digitalWrite(13, LOW);
+  
+  pinMode(6,INPUT_PULLDOWN); // to be changed
+  attachInterrupt(digitalPinToInterrupt(6),buttonClicked,CHANGE);
+  
   rtc.begin();
   rtc.setTime(hours, minutes, seconds);
   rtc.setDate(days, months, years);
