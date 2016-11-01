@@ -150,10 +150,17 @@ void BLEcommand(void)
     
     if (cmd == "On") {
       digitalWrite(13, HIGH);
-      
+      digitalWrite(motor1, HIGH);
+      digitalWrite(motor2, HIGH);
+      updateAlarmTime();
+      setMedAlarm(1,alarm_hours,alarm_minutes,alarm_seconds+5,1);
+      setCurrentAlarm();
     }
     else if (cmd == "Off") {
       digitalWrite(13, LOW);
+      digitalWrite(motor1, LOW);
+      digitalWrite(motor2, LOW);
+
     }
     else if (find_text("alarm",cmd)==0) {
         delay(50);
