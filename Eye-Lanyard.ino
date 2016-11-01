@@ -33,12 +33,12 @@ struct MedAlarm{
 int enableMessage = 1;
 /* Change these values to set the current initial time */
 const byte seconds = 0;
-const byte minutes = 00;
-const byte hours = 14;
+const byte minutes = 0;
+const byte hours = 15;
 
 /* Change these values to set the current initial date */
-const byte days = 19;
-const byte months = 9;
+const byte days = 1;
+const byte months = 11;
 const byte years = 16;
 
 byte alarm_seconds;
@@ -95,7 +95,9 @@ void setup(void)
   rtc.setTime(hours, minutes, seconds);
   rtc.setDate(days, months, years);
 
-
+  setMedAlarm(1,15,00,5,1);  
+  setMedAlarm(4,15,00,10,1); 
+  setCurrentAlarm();
   
 
   if ( !ble.begin(VERBOSE_MODE) )
@@ -152,9 +154,8 @@ void BLEcommand(void)
       digitalWrite(13, HIGH);
       digitalWrite(motor1, HIGH);
       digitalWrite(motor2, HIGH);
-      updateAlarmTime();
-      setMedAlarm(1,alarm_hours,alarm_minutes,alarm_seconds+5,1);
-      setCurrentAlarm();
+  rtc.setTime(hours, minutes, seconds);
+  rtc.setDate(days, months, years);
     }
     else if (cmd == "Off") {
       digitalWrite(13, LOW);
