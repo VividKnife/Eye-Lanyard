@@ -77,6 +77,7 @@ void buttonClicked()
       digitalWrite(13, LOW);
       digitalWrite(motor1, LOW);
       digitalWrite(motor2, LOW);
+      
 }
 
 /**********************************************************/
@@ -334,10 +335,12 @@ void alarmMatch()
   digitalWrite(13, HIGH);
   MedAlarm tmp = getMedAlarm(currentAlarm);
   if(tmp.id<=3){
-    analogWrite(motor1,speed);
+    digitalWrite(11, HIGH);
+    //analogWrite(motor1,speed);
   }else
   {
-    analogWrite(motor2,speed);
+    digitalWrite(12, HIGH);
+    //analogWrite(motor2,speed);
   }
 
   currentAlarm++;
