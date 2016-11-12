@@ -110,6 +110,12 @@ void buttonClicked()
   timeStamp[timeStampCounter] = String("Med 2: " + h + ": " + m + ": " + s);
 
   debuger(String("TimeStamp: Med 2: " + h + ": " + m + ": " + s));
+
+  if(ble.isConnected())
+  {
+    ble.print("AT+BLEUARTTX=");
+    ble.println("TimeStemp");  
+  }
   timeStampCounter++;
   if(timeStampCounter==50) timeStampCounter = 0;
   timeStampflag = 0;  
@@ -480,6 +486,12 @@ void alarmMatch()
     analogWrite(motor2,speed);
     timeStampflag = 2;
     debuger("Moter2 ON");
+  }
+
+  if(ble.isConnected())
+  {
+    ble.print("AT+BLEUARTTX=");
+    ble.println("TimeStemp");  
   }
 
   debuger("Alarm Match!!!****************");
