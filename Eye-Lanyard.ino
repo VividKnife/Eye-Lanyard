@@ -236,6 +236,9 @@ void BLEcommand(void)
      // setCurrentAlarm();
      rtc.setTime(hours, minutes, seconds);
       //timeStampflag = 1;
+      
+    ble.print("AT+BLEUARTTX=");
+    ble.println("TimeStemp");  
       }
       
     }
