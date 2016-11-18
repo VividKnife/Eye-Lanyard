@@ -48,6 +48,8 @@ byte alarm_minutes;
 byte alarm_hours;
 int  alarm_run_time;
 
+int isconnected=0;
+
 void alarmMatch(void);
 int find_text(String needle, String haystack);
 void BLEcommand(void);
@@ -111,11 +113,9 @@ void buttonClicked()
 
   debuger(String("TimeStamp: Med 2: " + h + ": " + m + ": " + s));
 
-  if(ble.isConnected())
-  {
     ble.print("AT+BLEUARTTX=");
     ble.println("TimeStemp");  
-  }
+  
   timeStampCounter++;
   if(timeStampCounter==50) timeStampCounter = 0;
   timeStampflag = 0;  
@@ -195,6 +195,7 @@ void loop(void)
   floop=0;
   }
   while ( ble.isConnected()) {
+    isconnected = 1;
     if(fcommand){
         debuger("BLE connected, waitting for commmad");
         fcommand = 0;
@@ -203,7 +204,7 @@ void loop(void)
     BLEcommand();
   }
    
-
+  isconnected = 0;
 
   delay(500);
 }
@@ -491,11 +492,11 @@ void alarmMatch()
     debuger("Moter2 ON");
   }
 
-  if(ble.isConnected())
-  {
+
+  
     ble.print("AT+BLEUARTTX=");
     ble.println("TimeStemp");  
-  }
+  
 
   debuger("Alarm Match!!!****************");
   debuger("The Matched alarm is");
